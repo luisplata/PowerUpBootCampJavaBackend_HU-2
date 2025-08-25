@@ -16,7 +16,7 @@ adapters:
     host: "${POSTGRES_HOST:postgres}"
     port: "${POSTGRES_PORT:5432}"
     database: "${POSTGRES_DB:perylothdb}"
-    schema: "solicitud"
+    schema: "public"
     username: "${POSTGRES_USER:user}"
     password: "${POSTGRES_PASSWORD:password}"
 management:

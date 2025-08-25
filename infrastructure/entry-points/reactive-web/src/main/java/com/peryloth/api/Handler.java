@@ -26,4 +26,9 @@ public class Handler {
         // useCase.logic();
         return ServerResponse.ok().bodyValue("");
     }
+
+    public Mono<ServerResponse> loadRequest(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(Object.class)
+                .flatMap(body -> ServerResponse.ok().bodyValue(body));
+    }
 }
