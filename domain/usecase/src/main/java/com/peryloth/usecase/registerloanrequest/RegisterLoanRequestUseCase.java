@@ -18,12 +18,16 @@ public class RegisterLoanRequestUseCase implements IRegisterLoanRequest {
     public Mono<Solicitud> registerLoanRequest(Solicitud solicitud) {
         //TODO implement validations with a commandQuery pattern
 
-        return tipoPrestamoReactRepository.findByName(solicitud.getTipoPrestamo().getNombre()).flatMap(tipoPrestamo -> {
-            solicitud.setTipoPrestamo(tipoPrestamo);
-            return estadosRepository.getEstadoById(solicitud.getEstado().getIdEstado()).flatMap(estados -> {
-                solicitud.setEstado(estados);
-                return solicitudRepository.saveSolicitud(solicitud);
-            });
-        }).doOnNext(saved -> System.out.println("Registering loan request: " + saved));
+        return tipoPrestamoReactRepository.findByName(solicitud.getTipoPrestamo().getNombre())
+                .doOnNext(saved -> System.out.println("Registering loan request: " + saved))
+                .flatMap(tipoPrestamo -> {
+                    solicitud.setTipoPrestamo(tipoPrestamo);
+                    return estadosRepository.getEstadoById(solicitud.getEstado().getIdEstado())
+                            .doOnNext(saved -> System.out.println("Estado found: " + saved))
+                            .flatMap(estados -> {
+                                solicitud.setEstado(estados);
+                                return solicitudRepository.saveSolicitud(solicitud);
+                            });
+                }).doOnNext(saved -> System.out.println("Registering loan request: " + saved));
     }
 }

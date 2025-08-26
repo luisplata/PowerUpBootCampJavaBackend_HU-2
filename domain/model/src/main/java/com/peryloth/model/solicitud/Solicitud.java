@@ -4,8 +4,6 @@ import com.peryloth.model.estados.Estados;
 import com.peryloth.model.tipoprestamo.TipoPrestamo;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,6 +16,6 @@ public class Solicitud {
     private TipoPrestamo tipoPrestamo;   // debe traer idTipoPrestamo poblado antes de guardar
     private Estados estado;              // debe traer idEstado poblado antes de guardar
     private Double monto;
-    private Integer plazoMeses;          // <- NUEVO, requerido por la tabla
-    private LocalDateTime fechaCreacion;
+    private Integer plazoMeses;
+    private String email;
 }

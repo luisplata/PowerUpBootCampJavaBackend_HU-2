@@ -20,10 +20,29 @@ public class SolicitudRepositoryAdapter extends ReactiveAdapterOperations<
         super(repository, mapper, d -> mapper.map(d, Solicitud.class));
     }
 
+    // Dentro de tu adapter de persistencia de Solicitud
+    private SolicitudEntity toEntity(Solicitud s) {
+        return SolicitudEntity.builder()
+                .idSolicitud(s.getIdSolicitud())
+                .monto(s.getMonto() != null ? java.math.BigDecimal.valueOf(s.getMonto()) : null)
+                .plazo(s.getPlazoMeses()) // del dominio
+                .email(s.getEmail())
+                .estadoId(s.getEstado() != null ? s.getEstado().getIdEstado() : null)
+                .tipoPrestamoId(s.getTipoPrestamo() != null ? s.getTipoPrestamo().getIdTipoPrestamo() : null)
+                .build();
+    }
+
+    private Solicitud toDomain(SolicitudEntity e, Solicitud original) {
+        // reusa los objetos ya resueltos en el use case (estado y tipoPrestamo), solo setea el id generado
+        return original.toBuilder()
+                .idSolicitud(e.getIdSolicitud())
+                .build();
+    }
+
     @Override
     public Mono<Solicitud> saveSolicitud(Solicitud solicitud) {
-        SolicitudEntity entity = mapper.map(solicitud, SolicitudEntity.class);
-        return repository.save(entity)
-                .map(saved -> mapper.map(saved, Solicitud.class));
+        return repository.save(toEntity(solicitud))
+                .map(saved -> toDomain(saved, solicitud));
     }
+
 }

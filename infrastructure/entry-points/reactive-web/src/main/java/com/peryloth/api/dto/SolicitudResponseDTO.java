@@ -11,10 +11,10 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 public class SolicitudResponseDTO {
     private Long idSolicitud;
-    private String usuarioId;
+    private String usuario_id;
     private String estado;
     private BigDecimal monto;
     private Integer plazoMeses;
     private String tipoPrestamoNombre;
-    private LocalDateTime fechaCreacion;
+    private String email;
 }

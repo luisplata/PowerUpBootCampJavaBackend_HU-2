@@ -5,31 +5,35 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Table("solicitud")
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder(toBuilder = true)
-@Table("solicitud")
+@Builder
 public class SolicitudEntity {
 
     @Id
     @Column("id_solicitud")
     private Long idSolicitud;
 
-    @Column("usuario_id")
-    private Long usuarioId;
-
-    @Column("tipo_prestamo_id")
-    private Long tipoPrestamoId;
-
-    @Column("estado_id")
-    private Long estadoId;
-
     @Column("monto")
-    private Double monto;
+    private BigDecimal monto;
+
+    @Column("plazo")
+    private Integer plazo; // <- requerido por tu DDL original
+
+    @Column("email")
+    private String email;  // <- si tu DDL lo tiene NOT NULL
+
+    @Column("id_estado")
+    private Long estadoId; // FK
+
+    @Column("id_tipo_prestamo")
+    private Long tipoPrestamoId; // FK
 
     @Column("fecha_creacion")
     private LocalDateTime fechaCreacion;
