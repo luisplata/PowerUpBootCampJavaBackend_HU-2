@@ -1,5 +1,8 @@
 package com.peryloth.api;
 
+import com.peryloth.api.dto.SolicitudRequestDTO;
+import com.peryloth.api.mapper.SolicitudDTOMapper;
+import com.peryloth.usecase.registerloanrequest.IRegisterLoanRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -9,26 +12,19 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 public class Handler {
-//private  final UseCase useCase;
-//private  final UseCase2 useCase2;
 
-    public Mono<ServerResponse> listenGETUseCase(ServerRequest serverRequest) {
-        // useCase.logic();
-        return ServerResponse.ok().bodyValue("");
-    }
-
-    public Mono<ServerResponse> listenGETOtherUseCase(ServerRequest serverRequest) {
-        // useCase2.logic();
-        return ServerResponse.ok().bodyValue("");
-    }
-
-    public Mono<ServerResponse> listenPOSTUseCase(ServerRequest serverRequest) {
-        // useCase.logic();
-        return ServerResponse.ok().bodyValue("");
-    }
+    private final IRegisterLoanRequest registerLoanRequest;
+    private final SolicitudDTOMapper solicitudDTOMapper;
 
     public Mono<ServerResponse> loadRequest(ServerRequest serverRequest) {
-        return serverRequest.bodyToMono(Object.class)
-                .flatMap(body -> ServerResponse.ok().bodyValue(body));
+        return serverRequest.bodyToMono(SolicitudRequestDTO.class)
+                .flatMap(requestDTO ->
+                        registerLoanRequest.registerLoanRequest(solicitudDTOMapper.toEntity(requestDTO)).flatMap(entity ->
+                                ServerResponse.ok().bodyValue(solicitudDTOMapper.toResponseDTO(entity))
+                        )
+                )
+                .onErrorResume(IllegalArgumentException.class,
+                        e -> ServerResponse.badRequest().bodyValue("Error de validación: " + e.getMessage()))
+                .onErrorResume(e -> ServerResponse.status(500).bodyValue("Error interno: " + e.getMessage()));
     }
 }
