@@ -3,9 +3,9 @@
 ## Problemas
 
 ## TODO
-- Pruebas unitarias
-- Coverage
-- Documentación API
+- [X] Pruebas unitarias
+- [X] Coverage
+- [X] Documentación API
 - Conexion con el otro micro para consulta de email y documento de identidad
 
 ## Examples
