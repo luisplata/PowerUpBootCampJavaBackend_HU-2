@@ -30,3 +30,7 @@ management:
         enabled: true
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
+
+user-service:
+  base-url: http://app-service-hu1:8080
+  secret-key: "${APP_SECRET_KEY:mysecretkey}"
