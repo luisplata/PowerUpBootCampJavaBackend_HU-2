@@ -19,9 +19,10 @@ public class Handler {
     public Mono<ServerResponse> loadRequest(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(SolicitudRequestDTO.class)
                 .flatMap(requestDTO ->
-                        registerLoanRequest.registerLoanRequest(solicitudDTOMapper.toEntity(requestDTO)).flatMap(entity ->
-                                ServerResponse.ok().bodyValue(solicitudDTOMapper.toResponseDTO(entity))
-                        )
+                        registerLoanRequest.registerLoanRequest(solicitudDTOMapper.toEntity(requestDTO), requestDTO.getDocumentoIdentidad(), requestDTO.getEmail())
+                                .flatMap(entity ->
+                                        ServerResponse.ok().bodyValue(solicitudDTOMapper.toResponseDTO(entity))
+                                )
                 )
                 .onErrorResume(IllegalArgumentException.class,
                         e -> ServerResponse.badRequest().bodyValue("Error de validación: " + e.getMessage()))

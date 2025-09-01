@@ -8,63 +8,124 @@ import com.peryloth.model.tipoprestamo.TipoPrestamo;
 import com.peryloth.model.tipoprestamo.gateways.TipoPrestamoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 class RegisterLoanRequestUseCaseTest {
 
-    private TipoPrestamoRepository tipoPrestamoRepository;
-    private SolicitudRepository solicitudRepository;
-    private EstadosRepository estadosRepository;
-
+    private TipoPrestamoRepository tipoRepo;
+    private SolicitudRepository solicitudRepo;
+    private EstadosRepository estadosRepo;
+    private IGetUserRepository userRepo;
     private RegisterLoanRequestUseCase useCase;
 
     @BeforeEach
-    void setUp() {
-        tipoPrestamoRepository = mock(TipoPrestamoRepository.class);
-        solicitudRepository = mock(SolicitudRepository.class);
-        estadosRepository = mock(EstadosRepository.class);
+    void setup() {
+        tipoRepo = Mockito.mock(TipoPrestamoRepository.class);
+        solicitudRepo = Mockito.mock(SolicitudRepository.class);
+        estadosRepo = Mockito.mock(EstadosRepository.class);
+        userRepo = Mockito.mock(IGetUserRepository.class);
 
-        useCase = new RegisterLoanRequestUseCase(
-                tipoPrestamoRepository, solicitudRepository, estadosRepository
-        );
+        useCase = new RegisterLoanRequestUseCase(tipoRepo, solicitudRepo, estadosRepo, userRepo);
     }
 
     @Test
-    void registerLoanRequest_success() {
-        // Arrange
-        TipoPrestamo tipoPrestamo = new TipoPrestamo();
-        tipoPrestamo.setNombre("Normal");
-
-        Estados estado = new Estados();
-        estado.setIdEstado(1L);
-        estado.setNombre("Pendiente");
-
+    void shouldRegisterLoanSuccessfully() {
         Solicitud solicitud = new Solicitud();
-        solicitud.setTipoPrestamo(tipoPrestamo);
-        solicitud.setEstado(estado);
+        solicitud.setMonto(1000.0);
+        solicitud.setPlazoMeses(12);
+        solicitud.setTipoPrestamo(TipoPrestamo.builder()
+                .nombre("Personal")
+                .build());
+        solicitud.setEstado(new Estados(1L, "Pendiente"));
 
-        when(tipoPrestamoRepository.findByName("Normal"))
-                .thenReturn(Mono.just(tipoPrestamo));
-        when(estadosRepository.getEstadoById(1L))
-                .thenReturn(Mono.just(estado));
-        when(solicitudRepository.saveSolicitud(any(Solicitud.class)))
+        Mockito.when(tipoRepo.findByName("Personal"))
+                .thenReturn(Mono.just(TipoPrestamo.builder()
+                        .nombre("Personal")
+                        .build()));
+        Mockito.when(estadosRepo.getEstadoById(1L))
+                .thenReturn(Mono.just(new Estados(1L, "Pendiente")));
+        Mockito.when(userRepo.isUserValid("123", "test@test.com"))
+                .thenReturn(Mono.just(true));
+        Mockito.when(solicitudRepo.saveSolicitud(solicitud))
                 .thenReturn(Mono.just(solicitud));
 
-        // Act + Assert
-        StepVerifier.create(useCase.registerLoanRequest(solicitud))
-                .expectNextMatches(saved ->
-                        saved.getTipoPrestamo().getNombre().equals("Normal") &&
-                                saved.getEstado().getIdEstado() == 1L
-                )
+        StepVerifier.create(useCase.registerLoanRequest(solicitud, "123", "test@test.com"))
+                .expectNext(solicitud)
                 .verifyComplete();
+    }
 
-        // Verify mocks were called
-        verify(tipoPrestamoRepository).findByName("Normal");
-        verify(estadosRepository).getEstadoById(1L);
-        verify(solicitudRepository).saveSolicitud(solicitud);
+    @Test
+    void shouldFailWhenUserInvalid() {
+        Solicitud solicitud = new Solicitud();
+        solicitud.setMonto(1000.0);
+        solicitud.setPlazoMeses(12);
+        solicitud.setTipoPrestamo(TipoPrestamo.builder()
+                .nombre("Personal")
+                .build());
+        solicitud.setEstado(new Estados(1L, "Pendiente"));
+
+        Mockito.when(tipoRepo.findByName("Personal"))
+                .thenReturn(Mono.just(TipoPrestamo.builder()
+                        .nombre("Personal")
+                        .build()));
+        Mockito.when(estadosRepo.getEstadoById(1L))
+                .thenReturn(Mono.just(new Estados(1L, "Pendiente")));
+        Mockito.when(userRepo.isUserValid("123", "test@test.com"))
+                .thenReturn(Mono.just(false));
+
+        StepVerifier.create(useCase.registerLoanRequest(solicitud, "123", "test@test.com"))
+                .expectError(RuntimeException.class)
+                .verify();
+    }
+
+    @Test
+    void shouldFailWhenUserIsNull() {
+        Solicitud solicitud = new Solicitud();
+        solicitud.setMonto(1000.0);
+        solicitud.setPlazoMeses(12);
+        solicitud.setTipoPrestamo(TipoPrestamo.builder()
+                .nombre("Personal")
+                .build());
+        solicitud.setEstado(new Estados(1L, "Pendiente"));
+
+        Mockito.when(tipoRepo.findByName("Personal"))
+                .thenReturn(Mono.just(TipoPrestamo.builder()
+                        .nombre("Personal")
+                        .build()));
+        Mockito.when(estadosRepo.getEstadoById(1L))
+                .thenReturn(Mono.just(new Estados(1L, "Pendiente")));
+        Mockito.when(userRepo.isUserValid("123", "test@test.com"))
+                .thenReturn(Mono.just(Boolean.FALSE));
+
+        StepVerifier.create(useCase.registerLoanRequest(solicitud, "123", "test@test.com"))
+                .expectError(RuntimeException.class)
+                .verify();
+    }
+
+    @Test
+    void shouldRegisterLoanWhenUserIsValidTrue() {
+        Solicitud solicitud = new Solicitud();
+        solicitud.setMonto(1000.0);
+        solicitud.setPlazoMeses(12);
+        solicitud.setTipoPrestamo(TipoPrestamo.builder()
+                .nombre("Personal")
+                .build());
+        solicitud.setEstado(new Estados(1L, "Pendiente"));
+
+        Mockito.when(tipoRepo.findByName("Personal"))
+                .thenReturn(Mono.just(TipoPrestamo.builder().nombre("Personal").build()));
+        Mockito.when(estadosRepo.getEstadoById(1L))
+                .thenReturn(Mono.just(new Estados(1L, "Pendiente")));
+        Mockito.when(userRepo.isUserValid("123", "test@test.com"))
+                .thenReturn(Mono.just(Boolean.TRUE)); // 👈 Caso True
+
+        Mockito.when(solicitudRepo.saveSolicitud(solicitud))
+                .thenReturn(Mono.just(solicitud));
+
+        StepVerifier.create(useCase.registerLoanRequest(solicitud, "123", "test@test.com"))
+                .expectNext(solicitud)
+                .verifyComplete();
     }
 }
