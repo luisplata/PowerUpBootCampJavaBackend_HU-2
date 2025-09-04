@@ -1,24 +1,30 @@
 # Anotaciones de proyecto
 
-## Problemas
+## Preguntas
 
-- Preguntar por el coverage y que modulos deben de ser testeados
-- Preguntar sobre como se debe de hacer la conexion con el otro microservicio para la consulta de email y documento de identidad
+- Como es la comunicacion entre los microservicios. Como se identifica que viene de otro micro o de un cliente externo.
 
 ## TODO
+
 - [X] Pruebas unitarias
 - [X] Coverage
 - [X] Documentación API
-- Conexion con el otro micro para consulta de email y documento de identidad Con webclient
+- [X] Conexion con el otro micro para consulta de email y documento de identidad Con webclient
+- [ ] Capturar las excepciones y retornar respuestas personalizadas.
 
 ## Examples
+
 - json postman
+
 ```json
 {
-  "documentoIdentidad": "{{$randomEmail}}",
-  "tipoPrestamoId":"Préstamo Normal",
-  "monto":50000,
+  "documentoIdentidad": "1143346134",
+  "tipoPrestamoId": "Préstamo Normal",
+  "monto": 50000,
   "plazoMeses": 5,
-  "email":"{{$randomEmail}}"
+  "email": "www.luisplata@gmail.com"
 }
 ```
+
+### Documentación API
+- http://localhost:8082/webjars/swagger-ui/index.html

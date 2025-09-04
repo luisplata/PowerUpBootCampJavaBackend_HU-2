@@ -8,6 +8,8 @@ import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Repository
 public class SolicitudRepositoryAdapter extends ReactiveAdapterOperations<
         Solicitud,
@@ -43,6 +45,13 @@ public class SolicitudRepositoryAdapter extends ReactiveAdapterOperations<
     public Mono<Solicitud> saveSolicitud(Solicitud solicitud) {
         return repository.save(toEntity(solicitud))
                 .map(saved -> toDomain(saved, solicitud));
+    }
+
+    @Override
+    public Mono<List<Solicitud>> getAllSolicitudes() {
+        return repository.findAll()
+                .map(this::toEntity)
+                .collectList();
     }
 
 }
