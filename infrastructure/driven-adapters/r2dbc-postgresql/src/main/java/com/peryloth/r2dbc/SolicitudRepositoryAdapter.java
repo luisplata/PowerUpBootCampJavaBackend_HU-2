@@ -6,6 +6,7 @@ import com.peryloth.r2dbc.entities.SolicitudEntity;
 import com.peryloth.r2dbc.helper.ReactiveAdapterOperations;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -48,10 +49,10 @@ public class SolicitudRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Mono<List<Solicitud>> getAllSolicitudes() {
+    public Flux<Solicitud> getAllSolicitudes() {
+        //TODO: filter  (aquellas que están "Pendiente de revisión", "Rechazadas", "Revision manual")
         return repository.findAll()
-                .map(this::toEntity)
-                .collectList();
+                .map(this::toEntity);
     }
 
 }

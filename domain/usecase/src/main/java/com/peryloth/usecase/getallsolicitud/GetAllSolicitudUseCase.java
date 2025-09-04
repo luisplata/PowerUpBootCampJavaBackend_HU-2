@@ -15,7 +15,6 @@ public class GetAllSolicitudUseCase implements IGetAllSolicitudUseCase {
     @Override
     public Flux<SolicitudResponseDTO> getAllSolicitud(String token) {
         return solicitudRepository.getAllSolicitudes()
-                .flatMapMany(Flux::fromIterable) // List<Solicitud> → Flux<Solicitud>
                 .flatMap(solicitud ->
                         getUserRepository.getUserByEmail(solicitud.getEmail(), token)
                                 .map(usuario -> new SolicitudResponseDTO(
