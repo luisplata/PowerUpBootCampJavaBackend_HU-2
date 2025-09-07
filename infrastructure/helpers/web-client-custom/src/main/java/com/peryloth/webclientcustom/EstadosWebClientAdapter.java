@@ -25,6 +25,7 @@ public class EstadosWebClientAdapter implements IGetUserRepository {
     @Override
     public Mono<Boolean> isUserValid(String id, String email) {
         return jwtTokenProvider.generateToken()
+                .doOnNext(key -> logger.info("🔑 Generated JWT Token: " + key))
                 .flatMap(jwtToken ->
                         webClient.post()
                                 .uri("/api/v1/users/validate")
