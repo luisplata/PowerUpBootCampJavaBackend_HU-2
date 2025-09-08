@@ -23,7 +23,7 @@ class SolicitudTest {
         assertThat(solicitud.getIdSolicitud()).isEqualTo(1L);
         assertThat(solicitud.getUsuario_id()).isEqualTo("12345");
         assertThat(solicitud.getMonto()).isEqualTo(3000.0);
-        assertThat(solicitud.getPlazoMeses()).isEqualTo(12);
+        assertThat(solicitud.getPlazo()).isEqualTo(12);
         assertThat(solicitud.getEmail()).isEqualTo("user@mail.com");
         assertThat(solicitud.getTipoPrestamo().getNombre()).isEqualTo("Personal");
         assertThat(solicitud.getEstado().getNombre()).isEqualTo("Pendiente");
@@ -35,12 +35,12 @@ class SolicitudTest {
                 .idSolicitud(2L)
                 .usuario_id("99999")
                 .monto(2000.0)
-                .plazoMeses(6)
+                .plazo(6)
                 .email("builder@mail.com")
                 .build();
 
         assertThat(solicitud.getUsuario_id()).isEqualTo("99999");
-        assertThat(solicitud.getPlazoMeses()).isEqualTo(6);
+        assertThat(solicitud.getPlazo()).isEqualTo(6);
         assertThat(solicitud.getEmail()).isEqualTo("builder@mail.com");
     }
 

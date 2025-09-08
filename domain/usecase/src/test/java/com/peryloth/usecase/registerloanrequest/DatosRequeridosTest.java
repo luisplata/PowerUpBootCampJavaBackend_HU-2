@@ -10,7 +10,7 @@ public class DatosRequeridosTest {
     void shouldFailWhenMontoNull() {
         Solicitud solicitud = new Solicitud();
         solicitud.setMonto(null);
-        solicitud.setPlazoMeses(12);
+        solicitud.setPlazo(12);
 
         StepVerifier.create(new DatosRequeridos().validate(solicitud))
                 .expectError(IllegalArgumentException.class)
@@ -21,7 +21,7 @@ public class DatosRequeridosTest {
     void shouldFailWhenPlazoNull() {
         Solicitud solicitud = new Solicitud();
         solicitud.setMonto(1000.0);
-        solicitud.setPlazoMeses(null);
+        solicitud.setPlazo(null);
 
         StepVerifier.create(new DatosRequeridos().validate(solicitud))
                 .expectError(IllegalArgumentException.class)
@@ -32,7 +32,7 @@ public class DatosRequeridosTest {
     void shouldPassWhenAllValid() {
         Solicitud solicitud = new Solicitud();
         solicitud.setMonto(1000.0);
-        solicitud.setPlazoMeses(12);
+        solicitud.setPlazo(12);
 
         StepVerifier.create(new DatosRequeridos().validate(solicitud))
                 .verifyComplete();

@@ -24,7 +24,7 @@ public class SolicitudEntity {
     private BigDecimal monto;
 
     @Column("plazo")
-    private Integer plazo; // <- requerido por tu DDL original
+    private Integer plazo;
 
     @Column("email")
     private String email;  // <- si tu DDL lo tiene NOT NULL
@@ -34,7 +34,4 @@ public class SolicitudEntity {
 
     @Column("id_tipo_prestamo")
     private Long tipoPrestamoId; // FK
-
-    @Column("fecha_creacion")
-    private LocalDateTime fechaCreacion;
 }

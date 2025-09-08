@@ -10,4 +10,6 @@ public interface SolicitudRepository {
     Mono<Solicitud> saveSolicitud(Solicitud solicitud);
 
     Flux<Solicitud> getAllSolicitudes();
+
+    Mono<Solicitud> findById(Long id);
 }

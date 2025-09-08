@@ -16,6 +16,8 @@ services:
       dockerfile: deployment/Dockerfile
     depends_on:
       - postgres-hu2
+    env_file:
+      - .env
     environment:
       POSTGRES_HOST: postgres-hu2
       POSTGRES_PORT: 5432

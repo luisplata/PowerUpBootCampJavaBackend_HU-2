@@ -13,7 +13,7 @@ public class SolicitudResponseDTO {
     private String usuario_id;
     private String estado;
     private BigDecimal monto;
-    private Integer plazoMeses;
+    private Integer plazo;
     private String tipoPrestamoNombre;
     private String email;
 }

@@ -9,7 +9,7 @@ public class PlazoValidationTest {
     @Test
     void shouldFailWhenPlazoInvalid() {
         Solicitud solicitud = new Solicitud();
-        solicitud.setPlazoMeses(0);
+        solicitud.setPlazo(0);
 
         StepVerifier.create(new PlazoValidation().validate(solicitud))
                 .expectError(RuntimeException.class)
@@ -19,7 +19,7 @@ public class PlazoValidationTest {
     @Test
     void shouldPassWhenPlazoValid() {
         Solicitud solicitud = new Solicitud();
-        solicitud.setPlazoMeses(12);
+        solicitud.setPlazo(12);
 
         StepVerifier.create(new PlazoValidation().validate(solicitud))
                 .verifyComplete();

@@ -34,7 +34,7 @@ class SolicitudRepositoryAdapterTest {
         Solicitud solicitud = Solicitud.builder()
                 .idSolicitud(null)
                 .monto(5000.0)
-                .plazoMeses(12)
+                .plazo(12)
                 .email("test@email.com")
                 .estado(Estados.builder().idEstado(1L).build())
                 .tipoPrestamo(TipoPrestamo.builder().idTipoPrestamo(2L).build())
@@ -61,7 +61,7 @@ class SolicitudRepositoryAdapterTest {
                     assertThat(saved.getIdSolicitud()).isEqualTo(10L);
                     assertThat(saved.getEmail()).isEqualTo("test@email.com");
                     assertThat(saved.getMonto()).isEqualTo(5000.0);
-                    assertThat(saved.getPlazoMeses()).isEqualTo(12);
+                    assertThat(saved.getPlazo()).isEqualTo(12);
                     assertThat(saved.getEstado().getIdEstado()).isEqualTo(1L);
                     assertThat(saved.getTipoPrestamo().getIdTipoPrestamo()).isEqualTo(2L);
                 })

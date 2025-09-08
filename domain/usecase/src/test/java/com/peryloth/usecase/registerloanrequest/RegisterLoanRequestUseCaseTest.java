@@ -34,7 +34,7 @@ class RegisterLoanRequestUseCaseTest {
     void shouldRegisterLoanSuccessfully() {
         Solicitud solicitud = new Solicitud();
         solicitud.setMonto(1000.0);
-        solicitud.setPlazoMeses(12);
+        solicitud.setPlazo(12);
         solicitud.setTipoPrestamo(TipoPrestamo.builder()
                 .nombre("Personal")
                 .build());
@@ -60,7 +60,7 @@ class RegisterLoanRequestUseCaseTest {
     void shouldFailWhenUserInvalid() {
         Solicitud solicitud = new Solicitud();
         solicitud.setMonto(1000.0);
-        solicitud.setPlazoMeses(12);
+        solicitud.setPlazo(12);
         solicitud.setTipoPrestamo(TipoPrestamo.builder()
                 .nombre("Personal")
                 .build());
@@ -84,7 +84,7 @@ class RegisterLoanRequestUseCaseTest {
     void shouldFailWhenUserIsNull() {
         Solicitud solicitud = new Solicitud();
         solicitud.setMonto(1000.0);
-        solicitud.setPlazoMeses(12);
+        solicitud.setPlazo(12);
         solicitud.setTipoPrestamo(TipoPrestamo.builder()
                 .nombre("Personal")
                 .build());
@@ -108,7 +108,7 @@ class RegisterLoanRequestUseCaseTest {
     void shouldRegisterLoanWhenUserIsValidTrue() {
         Solicitud solicitud = new Solicitud();
         solicitud.setMonto(1000.0);
-        solicitud.setPlazoMeses(12);
+        solicitud.setPlazo(12);
         solicitud.setTipoPrestamo(TipoPrestamo.builder()
                 .nombre("Personal")
                 .build());

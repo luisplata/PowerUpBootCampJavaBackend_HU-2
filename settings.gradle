@@ -26,3 +26,5 @@ include ':reactive-web'
 project(':reactive-web').projectDir = file('./infrastructure/entry-points/reactive-web')
 include ':web-client-custom'
 project(':web-client-custom').projectDir = file('./infrastructure/helpers/web-client-custom')
+include ':sqs-publisher'
+project(':sqs-publisher').projectDir = file('./infrastructure/helpers/sqs-publisher')

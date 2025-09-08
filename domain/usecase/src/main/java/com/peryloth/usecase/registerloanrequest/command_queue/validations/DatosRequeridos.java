@@ -9,7 +9,7 @@ public class DatosRequeridos implements SolicitudValidation {
         if (solicitud.getMonto() == null) {
             return Mono.error(new IllegalArgumentException("Falta monto"));
         }
-        if (solicitud.getPlazoMeses() == null) {
+        if (solicitud.getPlazo() == null) {
             return Mono.error(new IllegalArgumentException("Falta plazo en meses"));
         }
         return Mono.empty();

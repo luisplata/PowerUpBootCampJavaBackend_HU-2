@@ -6,6 +6,10 @@ import reactor.core.publisher.Mono;
 
 public interface EstadosRepository {
     Mono<Estados> saveEstado(Estados estado);
+
     Mono<Estados> getEstadoById(Long id);
+
+    Mono<Estados> getEstadoByNombre(String nombre);
+
     Flux<Estados> getAllEstados();
 }

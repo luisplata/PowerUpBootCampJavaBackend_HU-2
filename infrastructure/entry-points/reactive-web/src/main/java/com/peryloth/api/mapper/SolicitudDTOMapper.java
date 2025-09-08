@@ -16,13 +16,13 @@ public interface SolicitudDTOMapper {
     @Mapping(target = "tipoPrestamo", expression = "java(toTipoPrestamo(dto.getTipoPrestamoId()))")
     @Mapping(target = "estado", expression = "java(toEstadoPendiente())")
     @Mapping(target = "monto", source = "monto")
-    @Mapping(target = "plazoMeses", source = "plazoMeses")
+    @Mapping(target = "plazo", source = "plazo")
     Solicitud toEntity(SolicitudRequestDTO dto);
 
     @Mapping(target = "usuario_id", source = "usuario_id")
     @Mapping(target = "estado", source = "estado.nombre")
     @Mapping(target = "tipoPrestamoNombre", source = "tipoPrestamo.nombre")
-    @Mapping(target = "plazoMeses", source = "plazoMeses")
+    @Mapping(target = "plazo", source = "plazo")
     @Mapping(target = "monto", expression = "java(entity.getMonto() != null ? java.math.BigDecimal.valueOf(entity.getMonto()) : null)")
     SolicitudResponseDTO toResponseDTO(Solicitud entity);
 

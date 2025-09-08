@@ -16,6 +16,6 @@ public class Solicitud {
     private TipoPrestamo tipoPrestamo;   // debe traer idTipoPrestamo poblado antes de guardar
     private Estados estado;              // debe traer idEstado poblado antes de guardar
     private Double monto;
-    private Integer plazoMeses;
+    private Integer plazo;
     private String email;
 }

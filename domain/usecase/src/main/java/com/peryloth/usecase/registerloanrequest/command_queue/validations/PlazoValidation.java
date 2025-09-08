@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 public class PlazoValidation implements SolicitudValidation {
     @Override
     public Mono<Void> validate(Solicitud solicitud) {
-        if (solicitud.getPlazoMeses() <= 0) {
+        if (solicitud.getPlazo() <= 0) {
             return Mono.error(new RuntimeException("Plazo debe ser mayor a 0"));
         }
         return Mono.empty();

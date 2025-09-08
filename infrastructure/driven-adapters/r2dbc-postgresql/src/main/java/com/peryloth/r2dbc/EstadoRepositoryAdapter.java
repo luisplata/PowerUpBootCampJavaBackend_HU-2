@@ -40,6 +40,13 @@ public class EstadoRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
+    public Mono<Estados> getEstadoByNombre(String nombre) {
+        return repository.findByNombreIgnoreCase(nombre)
+                .map(e -> mapper.map(e, Estados.class))
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Estado no encontrado con nombre=" + nombre)));
+    }
+
+    @Override
     public Flux<Estados> getAllEstados() {
         return repository.findAll()
                 .map(e -> mapper.map(e, Estados.class));
