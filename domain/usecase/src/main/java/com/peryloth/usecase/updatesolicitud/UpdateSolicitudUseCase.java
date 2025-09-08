@@ -51,7 +51,15 @@ public class UpdateSolicitudUseCase implements IUpdateSolicitudUseCase {
                                 saved.getIdSolicitud(), saved.getEstado().getNombre())
                 ))
                 .flatMap(saved ->
-                        sqsPublisher.publishEstadoSolicitud(saved)
+                        sqsPublisher.publishEstadoSolicitud(
+                                        MessageDTO.builder()
+                                                .to(solicitud.getEmail())
+                                                .subject("Estado de su solicitud de préstamo es" + nuevoEstado.getNombre())
+                                                .body(
+                                                        String.format("Su solicitud de préstamo con ID %d ha sido %s.",
+                                                                saved.getIdSolicitud(), saved.getEstado().getNombre())
+                                                )
+                                                .build())
                                 .doOnSuccess(v -> System.out.println(
                                         String.format("Evento enviado a SQS para solicitud [%d]",
                                                 saved.getIdSolicitud())

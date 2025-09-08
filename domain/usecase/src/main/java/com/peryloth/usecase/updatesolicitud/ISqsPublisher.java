@@ -4,5 +4,5 @@ import com.peryloth.model.solicitud.Solicitud;
 import reactor.core.publisher.Mono;
 
 public interface ISqsPublisher {
-    Mono<Void> publishEstadoSolicitud(Solicitud solicitud);
+    Mono<Void> publishEstadoSolicitud(MessageDTO solicitud);
 }

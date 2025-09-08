@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.peryloth.model.solicitud.Solicitud;
 import com.peryloth.usecase.updatesolicitud.ISqsPublisher;
+import com.peryloth.usecase.updatesolicitud.MessageDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -21,7 +22,7 @@ public class SqsPublisher implements ISqsPublisher {
     private final String queueUrl = "https://sqs.us-east-1.amazonaws.com/326623589662/solicitudes-sqs";
 
     @Override
-    public Mono<Void> publishEstadoSolicitud(Solicitud solicitud) {
+    public Mono<Void> publishEstadoSolicitud(MessageDTO solicitud) {
         return Mono.fromCallable(() -> toJson(solicitud))
                 .flatMap(json -> Mono.fromFuture(() ->
                         sqsAsyncClient.sendMessage(SendMessageRequest.builder()
@@ -34,7 +35,7 @@ public class SqsPublisher implements ISqsPublisher {
                 .then();
     }
 
-    private String toJson(Solicitud solicitud) throws JsonProcessingException {
+    private String toJson(MessageDTO solicitud) throws JsonProcessingException {
         return objectMapper.writeValueAsString(solicitud);
     }
 }
