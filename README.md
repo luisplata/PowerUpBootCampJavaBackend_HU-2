@@ -11,6 +11,7 @@
 - [X] Documentación API
 - [X] Conexion con el otro micro para consulta de email y documento de identidad Con webclient
 - [ ] Capturar las excepciones y retornar respuestas personalizadas.
+- [ ] Paginacion de las solicitudes
 
 ## Examples
 

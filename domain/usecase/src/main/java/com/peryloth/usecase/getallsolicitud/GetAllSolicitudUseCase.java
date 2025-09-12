@@ -16,7 +16,6 @@ public class GetAllSolicitudUseCase implements IGetAllSolicitudUseCase {
     public Flux<SolicitudResponseDTO> getAllSolicitud(String token) {
         return solicitudRepository.getAllSolicitudes()
                 .flatMap(solicitud ->
-                        //TODO: Pasar token por contexto.
                         getUserRepository.getUserByEmail(solicitud.getEmail(), token)
                                 .map(usuario -> new SolicitudResponseDTO(
                                         solicitud,

@@ -34,3 +34,10 @@ cors:
 user-service:
   base-url: http://app-service-hu1:8080
   secret-key: "${APP_SECRET_KEY:mysecretkey}"
+endeudamiento-service:
+  base-url: "${API_ENDEUDAMIENTO}"
+
+logging.level.org.springframework.web.reactive.function.client.ExchangeFunctions: TRACE
+logging:
+  level:
+    reactor.netty.http.client: DEBUG

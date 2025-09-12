@@ -6,6 +6,7 @@ import com.peryloth.model.solicitud.Solicitud;
 import com.peryloth.model.solicitud.gateways.SolicitudRepository;
 import com.peryloth.model.tipoprestamo.TipoPrestamo;
 import com.peryloth.model.tipoprestamo.gateways.TipoPrestamoRepository;
+import com.peryloth.usecase.endeudamiento.CalcularCapacidadGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -19,6 +20,7 @@ class RegisterLoanRequestUseCaseTest {
     private EstadosRepository estadosRepo;
     private IGetUserRepository userRepo;
     private RegisterLoanRequestUseCase useCase;
+    private CalcularCapacidadGateway calcularCapacidadGateway;
 
     @BeforeEach
     void setup() {
@@ -26,8 +28,10 @@ class RegisterLoanRequestUseCaseTest {
         solicitudRepo = Mockito.mock(SolicitudRepository.class);
         estadosRepo = Mockito.mock(EstadosRepository.class);
         userRepo = Mockito.mock(IGetUserRepository.class);
+        userRepo = Mockito.mock(IGetUserRepository.class);
+        calcularCapacidadGateway = Mockito.mock(CalcularCapacidadGateway.class);
 
-        useCase = new RegisterLoanRequestUseCase(tipoRepo, solicitudRepo, estadosRepo, userRepo);
+        useCase = new RegisterLoanRequestUseCase(tipoRepo, solicitudRepo, estadosRepo, userRepo, calcularCapacidadGateway);
     }
 
     @Test
@@ -51,7 +55,7 @@ class RegisterLoanRequestUseCaseTest {
         Mockito.when(solicitudRepo.saveSolicitud(solicitud))
                 .thenReturn(Mono.just(solicitud));
 
-        StepVerifier.create(useCase.registerLoanRequest(solicitud, "123", "test@test.com"))
+        StepVerifier.create(useCase.registerLoanRequest(solicitud, "123", "test@test.com", ""))
                 .expectNext(solicitud)
                 .verifyComplete();
     }
@@ -75,7 +79,7 @@ class RegisterLoanRequestUseCaseTest {
         Mockito.when(userRepo.isUserValid("123", "test@test.com"))
                 .thenReturn(Mono.just(false));
 
-        StepVerifier.create(useCase.registerLoanRequest(solicitud, "123", "test@test.com"))
+        StepVerifier.create(useCase.registerLoanRequest(solicitud, "123", "test@test.com", ""))
                 .expectError(RuntimeException.class)
                 .verify();
     }
@@ -99,7 +103,7 @@ class RegisterLoanRequestUseCaseTest {
         Mockito.when(userRepo.isUserValid("123", "test@test.com"))
                 .thenReturn(Mono.just(Boolean.FALSE));
 
-        StepVerifier.create(useCase.registerLoanRequest(solicitud, "123", "test@test.com"))
+        StepVerifier.create(useCase.registerLoanRequest(solicitud, "123", "test@test.com", ""))
                 .expectError(RuntimeException.class)
                 .verify();
     }
@@ -124,7 +128,7 @@ class RegisterLoanRequestUseCaseTest {
         Mockito.when(solicitudRepo.saveSolicitud(solicitud))
                 .thenReturn(Mono.just(solicitud));
 
-        StepVerifier.create(useCase.registerLoanRequest(solicitud, "123", "test@test.com"))
+        StepVerifier.create(useCase.registerLoanRequest(solicitud, "123", "test@test.com", ""))
                 .expectNext(solicitud)
                 .verifyComplete();
     }

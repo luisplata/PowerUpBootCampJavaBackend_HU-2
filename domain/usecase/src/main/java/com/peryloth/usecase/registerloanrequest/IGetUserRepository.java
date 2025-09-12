@@ -1,7 +1,6 @@
 package com.peryloth.usecase.registerloanrequest;
 
 import com.peryloth.usecase.getallsolicitud.UsuarioResponseDTO;
-import reactor.core.CorePublisher;
 import reactor.core.publisher.Mono;
 
 public interface IGetUserRepository {

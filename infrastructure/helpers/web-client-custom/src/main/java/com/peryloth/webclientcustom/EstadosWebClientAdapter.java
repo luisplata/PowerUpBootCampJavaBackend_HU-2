@@ -1,99 +1,95 @@
 package com.peryloth.webclientcustom;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.peryloth.usecase.endeudamiento.CalcularCapacidadGateway;
+import com.peryloth.usecase.endeudamiento.CalcularCapacidadRequest;
+import com.peryloth.usecase.endeudamiento.CalcularCapacidadResponse;
 import com.peryloth.usecase.getallsolicitud.UsuarioResponseDTO;
 import com.peryloth.usecase.registerloanrequest.IGetUserRepository;
 import com.peryloth.webclientcustom.dto.GetUserByEmailRequestDTO;
-import com.peryloth.webclientcustom.dto.GetUserByEmailResponseDTO;
 import com.peryloth.webclientcustom.dto.TokenValidationResponse;
 import com.peryloth.webclientcustom.dto.UserValidationRequest;
 import com.peryloth.webclientcustom.helper.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.util.logging.Logger;
 
 @Component
 @RequiredArgsConstructor
 public class EstadosWebClientAdapter implements IGetUserRepository {
 
-    private final WebClient webClient;
+    private static final Logger logger = LoggerFactory.getLogger(EstadosWebClientAdapter.class);
+
+    private static final String HEADER_AUTHORIZATION = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
+
+    private final @Qualifier("userService") WebClient webClient;
     private final JwtTokenProvider jwtTokenProvider;
-    private static final Logger logger = Logger.getLogger(EstadosWebClientAdapter.class.getName());
 
     @Override
     public Mono<Boolean> isUserValid(String id, String email) {
         return jwtTokenProvider.generateToken()
-                .doOnNext(key -> logger.info("🔑 Generated JWT Token: " + key))
+                .doOnNext(key -> logger.info("Generated JWT Token: [{}]", key))
                 .flatMap(jwtToken ->
                         webClient.post()
                                 .uri("/api/v1/users/validate")
-                                .header("Authorization", "Bearer " + jwtToken)
+                                .header(HEADER_AUTHORIZATION, BEARER_PREFIX + jwtToken)
                                 .bodyValue(new UserValidationRequest(id, email))
-                                .exchangeToMono(response -> {
-                                    if (response.statusCode().is2xxSuccessful()) {
-                                        // Caso 200 → usuario válido
-                                        return response.bodyToMono(Boolean.class)
-                                                .doOnNext(valid -> logger.info("✅ User valid response: " + valid));
-                                    } else if (response.statusCode().is4xxClientError()) {
-                                        // Caso 401 → usuario inválido
-                                        return response.bodyToMono(Boolean.class)
+                                .exchangeToMono(response ->
+                                        response.bodyToMono(Boolean.class)
                                                 .defaultIfEmpty(false)
-                                                .doOnNext(valid -> logger.info("❌ User invalid response: " + valid));
-                                    } else {
-                                        // Otros errores → lo manejamos como inválido
-                                        return Mono.just(false);
-                                    }
-                                }))
+                                                .doOnNext(valid ->
+                                                        logger.info("User valid response ({}): [{}]",
+                                                                response.statusCode(), valid))
+                                ))
                 .onErrorResume(ex -> {
-                    logger.info("⚠️ Error en WebClient: " + ex.getMessage());
+                    logger.warn("Error en WebClient: [{}]", ex.getMessage());
                     return Mono.just(false);
                 });
-
     }
-
 
     public Mono<Boolean> isTokenValid(String token) {
         return webClient.get()
                 .uri("/api/v1/token/validate")
-                .header("Authorization", "Bearer " + token)
-                .exchangeToMono(response -> {
-                    if (response.statusCode().is2xxSuccessful()) {
-                        return response.bodyToMono(TokenValidationResponse.class)
+                .header(HEADER_AUTHORIZATION, BEARER_PREFIX + token)
+                .exchangeToMono(response ->
+                        response.bodyToMono(TokenValidationResponse.class)
                                 .map(dto -> "OK".equalsIgnoreCase(dto.status()))
-                                .defaultIfEmpty(false);
-                    } else if (response.statusCode().is4xxClientError()) {
-                        // Token inválido
-                        return Mono.just(false);
-                    } else {
-                        // Otros errores → se toma como inválido
-                        return Mono.just(false);
-                    }
-                })
-                .doOnNext(valid -> logger.info("🔑 Token valid: " + valid))
-                .doOnError(ex -> logger.warning("⚠️ Error validando token: " + ex.getMessage()))
+                                .defaultIfEmpty(false)
+                )
+                .doOnNext(valid -> logger.info("Token valid: [{}]", valid))
+                .doOnError(ex -> logger.warn("Error validando token: [{}]", ex.getMessage()))
                 .onErrorReturn(false);
     }
 
     public Mono<UsuarioResponseDTO> getUserByEmail(String email, String token) {
-        return webClient.post()
-                .uri("/api/v1/users/getUser")
-                .header("Authorization", "Bearer " + token)
-                .bodyValue(new GetUserByEmailRequestDTO(email))
-                .exchangeToMono(response -> {
-                    if (response.statusCode().is2xxSuccessful()) {
-                        return response.bodyToMono(UsuarioResponseDTO.class)
-                                .doOnNext(dto -> logger.info("✅ GetUserByEmail response: " + dto));
-                    } else if (response.statusCode().is4xxClientError()) {
-                        return Mono.error(new IllegalArgumentException("Usuario no encontrado o token inválido"));
-                    } else {
-                        return Mono.error(new IllegalArgumentException("Usuario no encontrado o token inválido"));
-                    }
-                })
-                .doOnNext(valid -> logger.info("🔑 Token valid: " + valid))
-                .doOnError(ex -> logger.warning("⚠️ Error validando token: " + ex.getMessage()));
+        return
+                webClient.post()
+                        .uri("/api/v1/users/getUser")
+                        .header(HEADER_AUTHORIZATION, BEARER_PREFIX + token)
+                        .bodyValue(new GetUserByEmailRequestDTO(email))
+                        .exchangeToMono(response -> {
+                            System.out.println("email: " + email);
+                            if (response.statusCode().is2xxSuccessful()) {
+                                return response.bodyToMono(String.class)
+                                        .switchIfEmpty(Mono.error(new RuntimeException("Respuesta vacía del servicio getUser")))
+                                        .doOnNext(body -> System.out.println("RAW BODY: " + body))
+                                        .flatMap(body -> {
+                                            try {
+                                                UsuarioResponseDTO dto = new ObjectMapper().readValue(body, UsuarioResponseDTO.class);
+                                                System.out.println("DTO: " + dto);
+                                                return Mono.just(dto);
+                                            } catch (Exception e) {
+                                                return Mono.error(new RuntimeException("Error parseando response a UsuarioResponseDTO", e));
+                                            }
+                                        });
+                            }
+                            return Mono.error(new IllegalArgumentException("Usuario no encontrado o token inválido"));
+                        })
+                        .doOnError(ex -> logger.warn("Error obteniendo usuario: [{}]", ex.getMessage()));
     }
-
-
 }

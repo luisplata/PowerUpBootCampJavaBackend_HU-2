@@ -7,6 +7,7 @@ import com.peryloth.api.mapper.SolicitudDTOMapper;
 import com.peryloth.usecase.getallsolicitud.IGetAllSolicitudUseCase;
 import com.peryloth.usecase.registerloanrequest.IRegisterLoanRequest;
 import com.peryloth.usecase.updatesolicitud.IUpdateSolicitudUseCase;
+import com.peryloth.webclientcustom.helper.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 /**
  * Handler define la lógica de negocio que será llamada desde el Router.
@@ -35,39 +37,45 @@ public class Handler {
     private final SolicitudDTOMapper solicitudDTOMapper;
     private final IGetAllSolicitudUseCase getAllSolicitudUseCase;
     private final IUpdateSolicitudUseCase updateSolicitudUseCase;
+    private final JwtTokenProvider jwtTokenProvider;
 
     /**
      * Crea una nueva solicitud de crédito.
      * Estado inicial: "Pendiente de revisión".
      */
     public Mono<ServerResponse> loadRequest(ServerRequest serverRequest) {
-        log.info("Iniciando proceso para crear nueva solicitud");
-        return serverRequest.bodyToMono(SolicitudRequestDTO.class)
-                .doOnNext(requestDTO -> log.info("Creando nueva solicitud para documento {}", requestDTO.getDocumentoIdentidad()))
-                .flatMap(requestDTO -> registerLoanRequest.registerLoanRequest(
-                                solicitudDTOMapper.toEntity(requestDTO),
-                                requestDTO.getDocumentoIdentidad(),
-                                requestDTO.getEmail()
+        return jwtTokenProvider.generateToken().flatMap(token ->
+                serverRequest.bodyToMono(SolicitudRequestDTO.class)
+                        .doOnNext(req -> log.info("Creando nueva solicitud para documento {}", req.getDocumentoIdentidad()))
+                        .flatMap(req -> registerLoanRequest.registerLoanRequest(
+                                        solicitudDTOMapper.toEntity(req),
+                                        req.getDocumentoIdentidad(),
+                                        req.getEmail(),
+                                        token
+                                )
                         )
                         .flatMap(entity -> {
-                            log.info("Solicitud {} creada correctamente", entity.getIdSolicitud());
-                            return ServerResponse.ok()
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .bodyValue(solicitudDTOMapper.toResponseDTO(entity));
-                        }))
-                .onErrorResume(IllegalArgumentException.class,
-                        e -> {
-                            log.warn("Error de validación al crear solicitud: {}", e.getMessage());
-                            return ServerResponse.badRequest()
-                                    .contentType(MediaType.TEXT_PLAIN)
-                                    .bodyValue("Error de validación: " + e.getMessage());
-                        })
-                .onErrorResume(e -> {
-                    log.error("Error interno al crear solicitud", e);
-                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .contentType(MediaType.TEXT_PLAIN)
-                            .bodyValue("Ocurrió un error interno");
-                });
+                                    var responseDTO = solicitudDTOMapper.toResponseDTO(entity);
+                                    log.info("DTO a retornar: {}", responseDTO);
+                                    return ServerResponse.ok()
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .bodyValue(solicitudDTOMapper.toResponseDTO(entity))
+                                            .doOnSuccess(resp -> log.info("Solicitud {} creada correctamente", entity.getIdSolicitud()));
+                                }
+                        )
+                        .onErrorResume(IllegalArgumentException.class, e ->
+                                ServerResponse.badRequest()
+                                        .contentType(MediaType.TEXT_PLAIN)
+                                        .bodyValue("Error de validación: " + e.getMessage())
+                                        .doOnSuccess(r -> log.warn("Error de validación al crear solicitud: {}", e.getMessage()))
+                        )
+                        .onErrorResume(e ->
+                                ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .contentType(MediaType.TEXT_PLAIN)
+                                        .bodyValue("Ocurrió un error interno")
+                                        .doOnSuccess(r -> log.error("Error interno al crear solicitud", e))
+                        )
+        );
     }
 
     /**

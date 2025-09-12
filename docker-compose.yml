@@ -16,8 +16,6 @@ services:
       dockerfile: deployment/Dockerfile
     depends_on:
       - postgres-hu2
-    env_file:
-      - .env
     environment:
       POSTGRES_HOST: postgres-hu2
       POSTGRES_PORT: 5432
@@ -25,6 +23,11 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       APP_SECRET_KEY: bootcamp_java_super_secure_secret_key_123456
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+      AWS_PROFILE: ${AWS_PROFILE}
+      API_ENDEUDAMIENTO: "https://g96q3d616f.execute-api.us-east-1.amazonaws.com"
     networks:
       - bootcamp_network
 

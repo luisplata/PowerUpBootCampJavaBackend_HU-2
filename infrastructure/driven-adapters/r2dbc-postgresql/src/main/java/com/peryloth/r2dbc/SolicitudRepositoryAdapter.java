@@ -65,9 +65,29 @@ public class SolicitudRepositoryAdapter extends ReactiveAdapterOperations<
 
     @Override
     public Flux<Solicitud> getAllSolicitudes() {
-        //TODO: filter  (aquellas que están "Pendiente de revisión", "Rechazadas", "Revision manual")
         return repository.findAll()
                 .map(this::toEntity);
     }
+
+    @Override
+    public Flux<Solicitud> getAllSolicitudesByEmail(String email) {
+        return repository.findAll()
+                .map(this::toEntity)
+                .filter(solicitud ->
+                        solicitud.getEmail().equalsIgnoreCase(email)
+                );
+    }
+
+    @Override
+    public Flux<Solicitud> getAllSolicitudesByEmailAndEstado(String email, Estados estados) {
+        return repository.findAll()
+                .map(this::toEntity)
+                .filter(solicitud ->
+                        solicitud.getEmail().equalsIgnoreCase(email)
+                                &&
+                                solicitud.getEstado().getIdEstado().equals(estados.getIdEstado())
+                );
+    }
+
 
 }
