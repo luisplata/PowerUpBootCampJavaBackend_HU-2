@@ -7,6 +7,7 @@ import com.peryloth.model.solicitud.gateways.SolicitudRepository;
 import com.peryloth.model.tipoprestamo.gateways.TipoPrestamoRepository;
 import com.peryloth.usecase.endeudamiento.CalcularCapacidadGateway;
 import com.peryloth.usecase.endeudamiento.CalcularCapacidadRequest;
+import com.peryloth.usecase.getallsolicitud.UsuarioResponseDTO;
 import com.peryloth.usecase.registerloanrequest.command_queue.UsuarioValidationQueue;
 import com.peryloth.usecase.registerloanrequest.command_queue.validations.*;
 import lombok.RequiredArgsConstructor;
@@ -60,47 +61,37 @@ public class RegisterLoanRequestUseCase implements IRegisterLoanRequest {
                                                                         ))
                                                                         .toList())
                                                                 .doOnNext(es -> System.out.println(" prestamos " + es.size()))
-                                                                //TODO: what's was that
+                                                                //TODO: what's was that: cuando entrega vacio no ejecta el flatmap
                                                                 .flatMap(solicitudesActivas ->
                                                                         {
-                                                                            CalcularCapacidadRequest request = new CalcularCapacidadRequest(
-                                                                                    usuario.salario_base(),
-                                                                                    solicitudesActivas,
-                                                                                    new CalcularCapacidadRequest.NuevoPrestamo(
-                                                                                            solicitud.getMonto(),
-                                                                                            solicitud.getTipoPrestamo().getTasaInteres(),
-                                                                                            solicitud.getPlazo()
-                                                                                    )
-                                                                            );
-                                                                            return calcularCapacidadGateway.calcular(request)
-                                                                                    .flatMap(result -> estadosRepository.getEstadoByNombre(result.decision())
-                                                                                            .flatMap(newEstado -> {
-                                                                                                solicitud.setEstado(newEstado);
-                                                                                                return Mono.just(solicitud);
-                                                                                            }).flatMap(solici -> solicitudRepository.saveSolicitud(solici)));
+                                                                            return getSolicitudMono(solicitud, usuario, solicitudesActivas);
                                                                         }
                                                                 ).switchIfEmpty(
                                                                         Mono.defer(() -> {
                                                                             System.out.println("No se encontraron solicitudes previas, guardando de todas formas...");
-                                                                            CalcularCapacidadRequest request = new CalcularCapacidadRequest(
-                                                                                    usuario.salario_base(),
-                                                                                    new ArrayList<>(),
-                                                                                    new CalcularCapacidadRequest.NuevoPrestamo(
-                                                                                            solicitud.getMonto(),
-                                                                                            solicitud.getTipoPrestamo().getTasaInteres(),
-                                                                                            solicitud.getPlazo()
-                                                                                    )
-                                                                            );
-                                                                            return calcularCapacidadGateway.calcular(request)
-                                                                                    .flatMap(result -> estadosRepository.getEstadoByNombre(result.decision())
-                                                                                            .flatMap(newEstado -> {
-                                                                                                solicitud.setEstado(newEstado);
-                                                                                                return Mono.just(solicitud);
-                                                                                            }).flatMap(solici -> solicitudRepository.saveSolicitud(solici)));
+                                                                            return getSolicitudMono(solicitud, usuario, new ArrayList<>());
                                                                         })
                                                                 )
                                                 );
                                     });
                         }).doOnNext(saved -> System.out.println("Registering loan request: " + saved)));
+    }
+
+    private Mono<Solicitud> getSolicitudMono(Solicitud solicitud, UsuarioResponseDTO usuario, List<CalcularCapacidadRequest.PrestamoActivo> solicitudesActivas) {
+        CalcularCapacidadRequest request = new CalcularCapacidadRequest(
+                usuario.salario_base(),
+                solicitudesActivas,
+                new CalcularCapacidadRequest.NuevoPrestamo(
+                        solicitud.getMonto(),
+                        solicitud.getTipoPrestamo().getTasaInteres().doubleValue(),
+                        solicitud.getPlazo()
+                )
+        );
+        return calcularCapacidadGateway.calcular(request)
+                .flatMap(result -> estadosRepository.getEstadoByNombre(result.decision())
+                        .flatMap(newEstado -> {
+                            solicitud.setEstado(newEstado);
+                            return Mono.just(solicitud);
+                        }).flatMap(solici -> solicitudRepository.saveSolicitud(solici)));
     }
 }

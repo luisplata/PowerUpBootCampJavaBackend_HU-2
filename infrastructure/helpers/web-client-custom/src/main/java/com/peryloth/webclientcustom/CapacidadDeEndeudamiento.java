@@ -12,11 +12,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @Component
-@RequiredArgsConstructor
 public class CapacidadDeEndeudamiento implements CalcularCapacidadGateway {
 
-    private final @Qualifier("endeudamiento") WebClient webClient;
+    private final WebClient webClient;
     private static final Logger logger = LoggerFactory.getLogger(CapacidadDeEndeudamiento.class);
+
+    public CapacidadDeEndeudamiento(@Qualifier("endeudamiento") WebClient webClient) {
+        this.webClient = webClient;
+    }
 
     @Override
     public Mono<CalcularCapacidadResponse> calcular(CalcularCapacidadRequest request) {

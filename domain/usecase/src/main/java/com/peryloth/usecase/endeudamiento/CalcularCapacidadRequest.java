@@ -10,6 +10,6 @@ public record CalcularCapacidadRequest(
     public record PrestamoActivo(double monto, double tasaMensual, int plazoMeses) {
     }
 
-    public record NuevoPrestamo(double monto, java.math.BigDecimal tasaMensual, int plazoMeses) {
+    public record NuevoPrestamo(double monto, double tasaMensual, int plazoMeses) {
     }
 }

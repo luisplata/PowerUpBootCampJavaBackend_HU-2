@@ -1,16 +1,12 @@
 package com.peryloth.webclientcustom;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.peryloth.usecase.endeudamiento.CalcularCapacidadGateway;
-import com.peryloth.usecase.endeudamiento.CalcularCapacidadRequest;
-import com.peryloth.usecase.endeudamiento.CalcularCapacidadResponse;
 import com.peryloth.usecase.getallsolicitud.UsuarioResponseDTO;
 import com.peryloth.usecase.registerloanrequest.IGetUserRepository;
 import com.peryloth.webclientcustom.dto.GetUserByEmailRequestDTO;
 import com.peryloth.webclientcustom.dto.TokenValidationResponse;
 import com.peryloth.webclientcustom.dto.UserValidationRequest;
 import com.peryloth.webclientcustom.helper.JwtTokenProvider;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,7 +15,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @Component
-@RequiredArgsConstructor
 public class EstadosWebClientAdapter implements IGetUserRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(EstadosWebClientAdapter.class);
@@ -27,8 +22,14 @@ public class EstadosWebClientAdapter implements IGetUserRepository {
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
 
-    private final @Qualifier("userService") WebClient webClient;
+
     private final JwtTokenProvider jwtTokenProvider;
+    private final WebClient webClient;
+
+    public EstadosWebClientAdapter(JwtTokenProvider jwtTokenProvider, @Qualifier("userService") WebClient webClient) {
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.webClient = webClient;
+    }
 
     @Override
     public Mono<Boolean> isUserValid(String id, String email) {
@@ -67,29 +68,28 @@ public class EstadosWebClientAdapter implements IGetUserRepository {
     }
 
     public Mono<UsuarioResponseDTO> getUserByEmail(String email, String token) {
-        return
-                webClient.post()
-                        .uri("/api/v1/users/getUser")
-                        .header(HEADER_AUTHORIZATION, BEARER_PREFIX + token)
-                        .bodyValue(new GetUserByEmailRequestDTO(email))
-                        .exchangeToMono(response -> {
-                            System.out.println("email: " + email);
-                            if (response.statusCode().is2xxSuccessful()) {
-                                return response.bodyToMono(String.class)
-                                        .switchIfEmpty(Mono.error(new RuntimeException("Respuesta vacía del servicio getUser")))
-                                        .doOnNext(body -> System.out.println("RAW BODY: " + body))
-                                        .flatMap(body -> {
-                                            try {
-                                                UsuarioResponseDTO dto = new ObjectMapper().readValue(body, UsuarioResponseDTO.class);
-                                                System.out.println("DTO: " + dto);
-                                                return Mono.just(dto);
-                                            } catch (Exception e) {
-                                                return Mono.error(new RuntimeException("Error parseando response a UsuarioResponseDTO", e));
-                                            }
-                                        });
-                            }
-                            return Mono.error(new IllegalArgumentException("Usuario no encontrado o token inválido"));
-                        })
-                        .doOnError(ex -> logger.warn("Error obteniendo usuario: [{}]", ex.getMessage()));
+        return webClient.post()
+                .uri("/api/v1/users/getUser")
+                .header(HEADER_AUTHORIZATION, BEARER_PREFIX + token)
+                .bodyValue(new GetUserByEmailRequestDTO(email))
+                .exchangeToMono(response -> {
+                    System.out.println("email: " + email);
+                    if (response.statusCode().is2xxSuccessful()) {
+                        return response.bodyToMono(String.class)
+                                .switchIfEmpty(Mono.error(new RuntimeException("Respuesta vacía del servicio getUser")))
+                                .doOnNext(body -> System.out.println("RAW BODY: " + body))
+                                .flatMap(body -> {
+                                    try {
+                                        UsuarioResponseDTO dto = new ObjectMapper().readValue(body, UsuarioResponseDTO.class);
+                                        System.out.println("DTO: " + dto);
+                                        return Mono.just(dto);
+                                    } catch (Exception e) {
+                                        return Mono.error(new RuntimeException("Error parseando response a UsuarioResponseDTO", e));
+                                    }
+                                });
+                    }
+                    return Mono.error(new IllegalArgumentException("Usuario no encontrado o token inválido"));
+                })
+                .doOnError(ex -> logger.warn("Error obteniendo usuario: [{}]", ex.getMessage()));
     }
 }

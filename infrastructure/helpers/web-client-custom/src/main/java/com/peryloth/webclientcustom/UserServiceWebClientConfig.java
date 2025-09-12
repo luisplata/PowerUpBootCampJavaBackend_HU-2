@@ -15,12 +15,13 @@ public class UserServiceWebClientConfig {
     public WebClient userServiceWebClient(
             WebClient.Builder builder,
             @Value("${user-service.base-url}") String baseUrl) {
-        System.out.println(">>> ENDEUDAMIENTO BASE URL user-service.base-url = " + baseUrl);
+        System.out.println(">>> USER-SERVICE BASE URL user-service.base-url = " + baseUrl);
         return builder.baseUrl(baseUrl)
                 .filter((request, next) -> next.exchange(request)
                         .flatMap(response -> response.bodyToMono(String.class)
                                 .doOnNext(body -> System.out.println("RAW BODY: " + body))
-                                .flatMap(b -> Mono.just(response.mutate().body(b).build())) // reconstruyo el response
+                                // reconstruyo el response
+                                .flatMap(b -> Mono.just(response.mutate().body(b).build()))
                         )
                 )
                 .build();
