@@ -85,7 +85,8 @@ public class RegisterLoanRequestUseCase implements IRegisterLoanRequest {
                         solicitud.getMonto(),
                         solicitud.getTipoPrestamo().getTasaInteres().doubleValue(),
                         solicitud.getPlazo()
-                )
+                ),
+                usuario.email()
         );
         return calcularCapacidadGateway.calcular(request)
                 .flatMap(result -> estadosRepository.getEstadoByNombre(result.decision())

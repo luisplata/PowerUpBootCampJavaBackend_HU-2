@@ -5,7 +5,8 @@ import java.util.List;
 public record CalcularCapacidadRequest(
         double ingresosTotales,
         List<PrestamoActivo> prestamosActivos,
-        NuevoPrestamo nuevoPrestamo
+        NuevoPrestamo nuevoPrestamo,
+        String email
 ) {
     public record PrestamoActivo(double monto, double tasaMensual, int plazoMeses) {
     }
