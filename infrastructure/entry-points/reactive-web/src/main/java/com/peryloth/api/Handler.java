@@ -119,6 +119,8 @@ public class Handler {
      * HU-6: Aprobar o Rechazar Solicitud
      */
     public Mono<ServerResponse> updateSolicitud(ServerRequest serverRequest) {
+        //TODO: Cuando apruebe mandar el reporte
+        //TODO: Crear un UseCase para cuando se pruebe, debe enviar a la cola de guardado de reportes
         Long solicitudId = Long.valueOf(serverRequest.pathVariable("id"));
         return serverRequest.bodyToMono(UpdateSolicitudRequestDTO.class)
                 .doOnNext(dto -> log.info("Petición de actualización recibida para solicitud {} con estado {}", solicitudId, dto.nuevoEstado()))
